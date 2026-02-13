@@ -1,4 +1,5 @@
 # terraform-aws-practice
+<<<<<<< HEAD
 # Terraform AWS Practice
 
 This repository contains a personal learning project focused on
@@ -107,3 +108,6 @@ No real customer or production information is included.
 
 
 
+=======
+オンプレミスでのインフラ運用経験を踏まえ、Terraformを用いてAWS上に本番相当の可用性・災害対策を考慮した構成を実装する学習プロジェクト。
+>>>>>>> ae48144 (Initial commit)
