@@ -144,3 +144,82 @@ resource "aws_vpc_endpoint" "s3" {
     ManagedBy   = "Terraform"
   }
 }
+
+# ------------------------------
+# Security Group
+# ------------------------------
+resource "aws_security_group" "ecs" {
+  name        = "${var.project_name}-sg-ecs"
+  description = "Security group for ECS tasks"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name        = "${var.project_name}-sg-ecs"
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_security_group" "mq" {
+  name        = "${var.project_name}-sg-mq"
+  description = "Security group for Amazon MQ"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name        = "${var.project_name}-sg-mq"
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_security_group" "rds" {
+  name        = "${var.project_name}-sg-rds"
+  description = "Security group for RDS"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name        = "${var.project_name}-sg-rds"
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_security_group_rule" "mq_ingress_from_ecs" {
+  type                     = "ingress"
+  description              = "Allow MQ from ECS"
+  security_group_id        = aws_security_group.mq.id
+  from_port                = 61617
+  to_port                  = 61617
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.ecs.id
+}
+
+resource "aws_security_group_rule" "ecs_egress_to_mq" {
+  type                     = "egress"
+  description              = "ECS to MQ"
+  security_group_id        = aws_security_group.ecs.id
+  from_port                = 61617
+  to_port                  = 61617
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.mq.id
+}
+
+resource "aws_security_group_rule" "rds_ingress_from_ecs" {
+  type                     = "ingress"
+  description              = "Allow DB from ECS"
+  security_group_id        = aws_security_group.rds.id
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.ecs.id
+}
+
+resource "aws_security_group_rule" "ecs_egress_to_rds" {
+  type                     = "egress"
+  description              = "ECS to RDS"
+  security_group_id        = aws_security_group.ecs.id
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.rds.id
+}
